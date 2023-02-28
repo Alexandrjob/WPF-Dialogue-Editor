@@ -1,37 +1,25 @@
-﻿using System.ComponentModel;
+﻿using System.Xml.Serialization;
 using XmlDeserializer.Models;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace DialogueEditor.BLL
 {
+    [XmlRoot(nameof(Variant))]
     public class VariantNotify : IVariant
     {
-        private readonly MainWindowViewModel _model;
-        private string? linkTeg;
-
         public string Question { get; set; }
         public string Answer { get; set; }
-        public string? LinkTeg
+        public string? LinkTeg { get; set; }
+
+        public VariantNotify()
         {
-            get => linkTeg;
-            set
-            {
-                if(linkTeg != null) 
-                {
-                    _model.ChangeTag(value, linkTeg);
-                }
-                
-                linkTeg = value;
-            }
+            
         }
 
-        public VariantNotify(IVariant variant, MainWindowViewModel model)
+        public VariantNotify(IVariant variant)
         {
             Question = variant.Question;
             Answer = variant.Answer;
             LinkTeg = variant.LinkTeg;
-
-            _model = model;
         }
     }
 }

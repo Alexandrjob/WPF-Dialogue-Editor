@@ -34,11 +34,11 @@ namespace DialogueEditor.ValidationRules
 
                 if(tag == value.ToString())
                 {
-                    return new ValidationResult(false, "Значение не может совпадать с другими тэгами");
+                    return new ValidationResult(true, "Тэг найден");
                 }
             }
 
-            return new ValidationResult(true,"");
+            return new ValidationResult(false,"");
         }
     }
 }

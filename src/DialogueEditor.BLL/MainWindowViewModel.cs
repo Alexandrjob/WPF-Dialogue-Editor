@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Xml.Serialization;
 using XmlDeserializer.Deserializer.Implementations;
-using XmlDeserializer.Models;
 
 namespace DialogueEditor.BLL
 {
@@ -11,6 +10,8 @@ namespace DialogueEditor.BLL
         private List<StepExtension> steps;
 
         private string? selectedTag;
+        private StepExtension selectedStep;
+        private string isShowStepDialog;
 
         public Dictionary<string, StepExtension>? TagSteps
         {
@@ -22,15 +23,25 @@ namespace DialogueEditor.BLL
                 OnPropertyChanged(nameof(TagSteps));
             }
         }
-        public List<StepExtension> Steps 
-        { 
-            get => steps; 
+        public List<StepExtension> Steps
+        {
+            get => steps;
             set
             {
                 steps = value;
                 OnPropertyChanged(nameof(Steps));
             }
         }
+
+        public StepExtension SelectedStep
+        {
+            get => selectedStep; set
+            {
+                selectedStep = value;
+                OnPropertyChanged(nameof(selectedStep));
+            }
+        }
+
         public string? SelectedTag
         {
             get => selectedTag;
@@ -38,14 +49,35 @@ namespace DialogueEditor.BLL
             {
                 selectedTag = value;
                 // Фильтрация элементов по выбранному ключу
-                Steps = TagSteps?.Where(kv => kv.Key == selectedTag).Select(kv => kv.Value).ToList() ?? new List<StepExtension>();
+                //Steps = TagSteps?.Where(kv => kv.Key == selectedTag).Select(kv => kv.Value).ToList() ?? new List<StepExtension>();
+                SelectedStep = TagSteps?.Where(kv => kv.Key == selectedTag).Select(kv => kv.Value).FirstOrDefault();
+                if (selectedTag == null)
+                    IsShowStepDialog = "Hidden";
+                else
+                    IsShowStepDialog = "Visible";
+
                 OnPropertyChanged(nameof(SelectedTag));
             }
         }
 
-        public void GetSteps()
+        public string IsShowStepDialog
         {
-            var deserializer = new Deserializer("output.xml");
+            get => isShowStepDialog;
+            set
+            {
+                isShowStepDialog = value;
+                OnPropertyChanged(nameof(isShowStepDialog));
+            }
+        }
+
+        public MainWindowViewModel()
+        {
+            IsShowStepDialog = "Hidden";
+        }
+
+        public void GetSteps(string path)
+        {
+            var deserializer = new Deserializer(path);
             var result = deserializer.GetAllSteps();
 
             var boxTagSteps = new Dictionary<string, StepExtension>();
@@ -55,6 +87,9 @@ namespace DialogueEditor.BLL
                 boxTagSteps.TryAdd(step.Key, new StepExtension(step.Value, step.Key, this));
             }
             TagSteps = boxTagSteps;
+
+            SelectedTag = null;
+            IsShowStepDialog = "Hidden";
         }
 
         public void DeleteStep(string? tag)
@@ -98,15 +133,14 @@ namespace DialogueEditor.BLL
             step.Variants = boxVariants;
         }
 
-        public void DeleteVariant(StepExtension step)
+        public void DeleteVariant(VariantNotify variant)
         {
-            var boxVariants = new List<VariantNotify>();
-            foreach (var variant in step.Variants)
-            {
-                boxVariants.Add(variant);
-            }
+            SelectedStep.Variants.Remove(variant);
 
-            step.Variants = boxVariants;
+            var newStep = new StepExtension(SelectedStep, SelectedStep.Tag, this);
+            //newStep.Variants.Remove(variant);
+            SelectedStep = newStep;
+
         }
 
         public void Save()

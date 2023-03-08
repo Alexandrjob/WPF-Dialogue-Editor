@@ -9,13 +9,38 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800"
         x:Name="WindowM">
+    <Window.Resources>
+        <DataTemplate x:Key="listTemplate">
+            <StackPanel Grid.Column="0" Background="AliceBlue" Margin="10">
+                <TextBlock Text="Слова детектива" FontSize="20" Width="auto" Margin="10,10,0,0"/>
+                <TextBox Text="{Binding Question}" FontSize="16" Width="auto" TextWrapping="WrapWithOverflow" FontStyle="Italic" Margin="15"/>
+
+                <TextBlock Text="Слова нпс" FontSize="20" Width="auto" Margin="10,10,0,0"/>
+                <TextBox Text="{Binding Answer}" FontSize="16" Width="auto" TextWrapping="WrapWithOverflow" Margin="15"/>
+
+                <TextBlock Text="Ссылка на следующий диалог" FontSize="20" Width="auto" Margin="10,10,0,0"/>
+                <TextBox FontSize="16" Width="auto" Margin="15" Foreground="Blue">
+                    <TextBox.Text>
+                        <Binding Path="LinkTeg"
+                                 UpdateSourceTrigger="PropertyChanged" >
+                            <Binding.ValidationRules>
+                                <local:LinkTagVariantValidator />
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </TextBox.Text>
+                </TextBox>
+                <Button Content="Удалить" FontSize="20" Click="Button_Click_Delete_Variant" Tag="{Binding}" Width="100" Margin="0,10,0,10"/>
+            </StackPanel>
+        </DataTemplate>
+    </Window.Resources>
+
     <DockPanel >
         <ToolBarTray DockPanel.Dock="Top">
             <ToolBar>
-                <Button Command="New" Content="New" Click="Button_Click" />
+                <Button Command="New" Content="New" Click="Button_Click" Click="Button_Click_Create_File"/>
                 <Button Content="Open" Click="Button_Click_Open_File" />
-                <Button Content="Save" Click="Button_Click_Save_In_File" />
-                <Button Content="Add dialog" Click="Button_Click_Add_Step"/>
+                <Button Content="Save" Click="Button_Click_Save_In_File" Visibility="{Binding IsShowStepDialog, Mode=TwoWay}"/>
+                <Button Content="Add dialog" Click="Button_Click_Add_Step" Visibility="{Binding IsShowStepDialog, Mode=TwoWay}"/>
             </ToolBar>
         </ToolBarTray>
 
@@ -24,78 +49,104 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition  Width="*"/>
             </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
+            <TextBlock Grid.Column="0" Grid.Row="0" Text="Тэги диалогов" FontSize="20" Padding="5" Background="AntiqueWhite"/>
             <!--Отображение ключей словаря-->
-            <ListBox x:Name="KeysListBox" Grid.Column="0" Grid.Row="0" ItemsSource="{Binding TagSteps.Keys}" SelectedItem="{Binding SelectedTag}">
+            <ListBox x:Name="KeysListBox" 
+                     Grid.Column="0" 
+                     Grid.Row="1" 
+                     ItemsSource="{Binding TagSteps.Keys}" 
+                     SelectedItem="{Binding SelectedTag}" 
+                     Focusable="False"
+                     Background="AntiqueWhite">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <DockPanel Width="250px">
                             <TextBlock Text="{Binding}" FontWeight="Bold"/>
                             <Button x:Name="ButtonDeleteStep" DockPanel.Dock="Right" Content="Удалить" Click="Button_Click_Delete_Step" Tag="{Binding}" />
                             <TextBlock  />
-                            </DockPanel>
+                        </DockPanel>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
-            <!--Отображение элементов типа Step-->
-            <ListBox x:Name="StepsListBox" Grid.Column="1" Grid.Row="0" ItemsSource="{Binding Steps, Mode=TwoWay}"  
-                       ScrollViewer.HorizontalScrollBarVisibility="Hidden">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <ScrollViewer Width="{Binding ActualWidth, ElementName=StepsListBox}" MaxWidth="{Binding ActualWidth, ElementName=StepsListBox}" 
-                                      MaxHeight="{Binding ActualHeight, ElementName=StepsListBox}" CanContentScroll="True" >
-                        <StackPanel x:Name="Step" Tag="{Binding}">
-                            <TextBlock Text="Название диалога" Margin="0,4,10,0"/>
-                            <TextBox Text="{Binding Tag}" FontWeight="Bold" TextWrapping="WrapWithOverflow" Margin="0,4,0,0"/>
+            
+            <TextBlock Grid.Column="1" Grid.Row="0" Text="Выбранный диалог" FontSize="20" Padding="5 5 0 5" Background="AliceBlue"/>
+            <TabControl x:Name="TabControl" Grid.Column="1" Grid.Row="1" Visibility="{Binding IsShowStepDialog, Mode=TwoWay}">
+                <TabItem Header="Вступительный вопрос-ответ">
+                    <ScrollViewer x:Name="StepsScrollViewer"
+                          CanContentScroll="True" 
+                          VerticalScrollBarVisibility="Auto">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <!--Отображение элемента типа Step-->
+                            <StackPanel
+                                x:Name="Step" 
+                                Tag="{Binding SelectedStep.Tag}" 
+                                Background="AliceBlue">
+                                <TextBlock Text="Название диалога" FontSize="20" Width="400" Margin="0,14,10,0"/>
+                                <TextBox FontSize="16" Width="400" FontWeight="Bold" TextWrapping="WrapWithOverflow" Margin="10">
+                                <TextBox.Text>
+                                        <Binding Path="SelectedStep.Tag"
+                                                 UpdateSourceTrigger="PropertyChanged" >
+                                        <Binding.ValidationRules>
+                                                <local:TagStageValidator />
+                                        </Binding.ValidationRules>
+                                    </Binding>
+                                </TextBox.Text>
+                                </TextBox>
+                                <TextBlock Text="Текст Детектива" FontSize="20" Width="auto" Margin="0,14,0,0"/>
+                                <TextBox Text="{Binding SelectedStep.Question}" FontSize="16" Width="auto" TextWrapping="WrapWithOverflow" Margin="10"/>
 
-                            <TextBlock Text="Текст Детектива" Margin="0,14,0,0"/>
-                            <TextBox Text="{Binding Question}" TextWrapping="WrapWithOverflow" Margin="0,4,0,0"/>
+                                <TextBlock Text="Текст Доктора" FontSize="20" Width="auto" Margin="0,14,0,0"/>
+                                <TextBox Text="{Binding SelectedStep.Answer}" FontSize="16" Width="auto" TextWrapping="WrapWithOverflow" Margin="10"/>
+                            </StackPanel>
 
-                            <TextBlock Text="Текст Доктора" Margin="0,14,0,0"/>
-                                <TextBox Text="{Binding Answer}" TextWrapping="WrapWithOverflow" Margin="0,4,0,0"/>
+                        </Grid>
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="Варианты диалога">
+                    <!--Отображение элементов типа Variant-->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="auto" />
+                        </Grid.RowDefinitions>
+                        <ListBox x:Name="VariantsListBox" 
+                                 Grid.Column="0" 
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled" 
+                                 HorizontalContentAlignment="Stretch" 
+                                 VerticalContentAlignment="Stretch"
+                                 VirtualizingPanel.ScrollUnit="Pixel"
+                                 ItemTemplate="{StaticResource listTemplate}"
+                                 ItemsSource="{Binding SelectedStep.Variants, Mode=TwoWay}">
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="Padding" Value="0"/>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                        </ListBox>
+                        <Button Grid.Column="1"
+                                Grid.Row="1"
+                            Content="Добавить" FontSize="20" 
+                                Click="Button_Click_Add_Variant" 
+                                Tag="{Binding SelectedStep}"/>
+                    </Grid>
+                </TabItem>
+            </TabControl>
 
-                                <DockPanel Margin="0,20,0,5">
-                                    <TextBlock Text="Варианты выбора диалога" Background="AntiqueWhite"/>
-                                    <Button Content="Добавить" Click="Button_Click_Add_Variant" Tag="{Binding}" Width="60px" Height="20" Margin="10,0,0,0" DockPanel.Dock="Left"/>
-                                    <TextBlock  />
-                                </DockPanel>
 
-                                <!--Отображение элементов типа Variant-->
-                                <ListBox x:Name="VariantsListBox" ItemsSource="{Binding Variants, Mode=TwoWay}" Padding="0,0,0,10"
-                                         MaxHeight="{Binding ActualHeight, ElementName=StepsListBox}"
-                                         ScrollViewer.VerticalScrollBarVisibility="Disabled" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <StackPanel ScrollViewer.VerticalScrollBarVisibility="Disabled">
-                                                <Button Content="Удалить" Click="Button_Click_Delete_Variant" Tag="{Binding Tag, ElementName=Step}" Width="60px" Height="20" Margin="0,10,0,10"/>
-                                            
-                                                <TextBlock Text="Слова детектива"  Margin="0,10,0,0"/>
-                                            <TextBox Text="{Binding Question}" TextWrapping="WrapWithOverflow" FontStyle="Italic" Margin="0,4,0,0"/>
-
-                                            <TextBlock Text="Слова нпс"  Margin="0,10,0,0"/>
-                                            <TextBox Text="{Binding Answer}" TextWrapping="WrapWithOverflow" Margin="0,4,0,0"/>
-
-                                            <TextBlock Text="Ссылка на диалог"  Margin="0,10,0,0"/>
-                                            <TextBox Margin="0,4,0,0" Foreground="Blue"
-                                               >
-                                                <TextBox.Text>
-                                                    <Binding Path="LinkTeg"
-                                                        UpdateSourceTrigger="PropertyChanged" >
-                                                        <Binding.ValidationRules>
-                                                            <local:TagStepValidator />
-                                                        </Binding.ValidationRules>
-                                                    </Binding>
-                                                </TextBox.Text>
-                                            </TextBox>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
-                        </StackPanel>
-                            </ScrollViewer>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
         </Grid>
     </DockPanel>
 

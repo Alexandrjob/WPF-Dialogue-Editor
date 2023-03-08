@@ -1,4 +1,5 @@
 ﻿using DialogueEditor.BLL;
+using Microsoft.Win32;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -22,7 +23,43 @@ namespace DialogueEditor
 
         private void Button_Click_Open_File(object sender, RoutedEventArgs e)
         {
-            viewModel.GetSteps();
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            
+            if (openFileDialog.ShowDialog() != true)
+            {
+                return;
+            }
+
+            MessageBoxResult result = MessageBoxResult.Cancel;
+
+            if (viewModel.TagSteps !=  null)
+            {
+                string messageBoxText = "В данный момент вы уже работаете с файлом. Вы уверены что хотите открыть другой файл? Все изменения будут утеряны";
+                string caption = "Открытие файла";
+                MessageBoxButton button = MessageBoxButton.OKCancel;
+                MessageBoxImage icon = MessageBoxImage.Warning;
+
+                result = MessageBox.Show(messageBoxText, caption, button, icon, MessageBoxResult.Yes);
+                if (result != MessageBoxResult.OK)
+                    return;
+            }
+
+            
+
+            try
+            {
+                viewModel.GetSteps(openFileDialog.FileName);
+            }
+            catch (System.Exception)
+            {
+
+                string messageBoxText = "Выбран не тот файл или файл содержит ошибки";
+                string caption = "Ошибка чтения файла";
+                MessageBoxButton button = MessageBoxButton.OK;
+                MessageBoxImage icon = MessageBoxImage.Error;
+
+                MessageBox.Show(messageBoxText, caption, button, icon);
+            }
         }
 
         private void Button_Click_Add_Step(object sender, RoutedEventArgs e)
@@ -53,11 +90,11 @@ namespace DialogueEditor
 
         private void Button_Click_Delete_Variant(object sender, RoutedEventArgs e)
         {
-            //var button = sender as Button;
-            //var step = button.Tag;
-            //var variant = button.Name;
+            var button = sender as Button;
+            var varuant = button.Tag;
+            
 
-            //viewModel.DeleteVariant((StepExtension)step);
+            viewModel.DeleteVariant((VariantNotify)varuant);
         }
     }
 }

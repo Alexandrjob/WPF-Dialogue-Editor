@@ -57,6 +57,18 @@ namespace DialogueEditor.BLL
             Variants = step.Variants.Select(v => new VariantNotify(v)).ToList();
         }
 
+        public StepExtension(StepExtension step, string tag, MainWindowViewModel model)
+        {
+            _model = model;
+
+            Tag = tag;
+
+            Question = step.Question;
+            Answer = step.Answer;
+
+            Variants = step.Variants.Select(v => new VariantNotify(v)).ToList();
+        }
+
         #region INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged(string propertyName)

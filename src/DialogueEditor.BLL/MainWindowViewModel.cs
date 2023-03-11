@@ -7,10 +7,10 @@ namespace DialogueEditor.BLL
     public class MainWindowViewModel : INotifyPropertyChanged
     {
         private Dictionary<string, StepExtension>? tagSteps;
-        private List<StepExtension> steps;
 
         private string? selectedTag;
         private StepExtension selectedStep;
+        
         private string isShowStepDialog;
 
         public Dictionary<string, StepExtension>? TagSteps
@@ -21,15 +21,6 @@ namespace DialogueEditor.BLL
             {
                 tagSteps = value;
                 OnPropertyChanged(nameof(TagSteps));
-            }
-        }
-        public List<StepExtension> Steps
-        {
-            get => steps;
-            set
-            {
-                steps = value;
-                OnPropertyChanged(nameof(Steps));
             }
         }
 
@@ -48,8 +39,6 @@ namespace DialogueEditor.BLL
             set
             {
                 selectedTag = value;
-                // Фильтрация элементов по выбранному ключу
-                //Steps = TagSteps?.Where(kv => kv.Key == selectedTag).Select(kv => kv.Value).ToList() ?? new List<StepExtension>();
                 SelectedStep = TagSteps?.Where(kv => kv.Key == selectedTag).Select(kv => kv.Value).FirstOrDefault();
                 if (selectedTag == null)
                     IsShowStepDialog = "Hidden";
@@ -138,24 +127,18 @@ namespace DialogueEditor.BLL
             SelectedStep.Variants.Remove(variant);
 
             var newStep = new StepExtension(SelectedStep, SelectedStep.Tag, this);
-            //newStep.Variants.Remove(variant);
             SelectedStep = newStep;
-
         }
 
         public void Save()
         {
             if (TagSteps == null)
-            {
                 return;
-            }
 
             XmlSerializer serializer = new XmlSerializer(typeof(List<StepExtension>));
-
-            // Создание потока для записи данных в файл
+            
             using (FileStream fileStream = new FileStream("output.xml", FileMode.Create))
             {
-                // Сериализация объекта в поток
                 serializer.Serialize(fileStream, TagSteps.Values.ToList());
             }
         }

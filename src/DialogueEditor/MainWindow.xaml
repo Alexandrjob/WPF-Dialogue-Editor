@@ -37,7 +37,7 @@
     <DockPanel >
         <ToolBarTray DockPanel.Dock="Top">
             <ToolBar>
-                <Button Command="New" Content="New" Click="Button_Click" Click="Button_Click_Create_File"/>
+                <Button Command="New" Content="New" Click="Button_Click_Create_File"/>
                 <Button Content="Open" Click="Button_Click_Open_File" />
                 <Button Content="Save" Click="Button_Click_Save_In_File" Visibility="{Binding IsShowStepDialog, Mode=TwoWay}"/>
                 <Button Content="Add dialog" Click="Button_Click_Add_Step" Visibility="{Binding IsShowStepDialog, Mode=TwoWay}"/>

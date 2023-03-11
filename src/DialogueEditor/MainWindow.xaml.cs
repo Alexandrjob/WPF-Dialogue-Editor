@@ -12,39 +12,30 @@ namespace DialogueEditor
         public MainWindow()
         {
             InitializeComponent();
-            viewModel = new MainWindowViewModel(); 
+            viewModel = new MainWindowViewModel();
             DataContext = viewModel;
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-
         }
 
         private void Button_Click_Open_File(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
+            var openFileDialog = new OpenFileDialog();
             
+
             if (openFileDialog.ShowDialog() != true)
-            {
                 return;
-            }
 
-            MessageBoxResult result = MessageBoxResult.Cancel;
-
-            if (viewModel.TagSteps !=  null)
+            if (viewModel.TagSteps != null)
             {
-                string messageBoxText = "В данный момент вы уже работаете с файлом. Вы уверены что хотите открыть другой файл? Все изменения будут утеряны";
-                string caption = "Открытие файла";
-                MessageBoxButton button = MessageBoxButton.OKCancel;
-                MessageBoxImage icon = MessageBoxImage.Warning;
+                var message =
+                    "В данный момент вы уже работаете с файлом. Вы уверены что хотите открыть другой файл? Все изменения будут утеряны";
+                var title = "Открытие файла";
+                var button = MessageBoxButton.OKCancel;
+                var icon = MessageBoxImage.Warning;
 
-                result = MessageBox.Show(messageBoxText, caption, button, icon, MessageBoxResult.Yes);
+                var result = ShowMessage(message, title, button, icon);
                 if (result != MessageBoxResult.OK)
                     return;
             }
-
-            
 
             try
             {
@@ -52,15 +43,18 @@ namespace DialogueEditor
             }
             catch (System.Exception)
             {
-
-                string messageBoxText = "Выбран не тот файл или файл содержит ошибки";
-                string caption = "Ошибка чтения файла";
-                MessageBoxButton button = MessageBoxButton.OK;
-                MessageBoxImage icon = MessageBoxImage.Error;
-
-                MessageBox.Show(messageBoxText, caption, button, icon);
+                ShowMessage("Ошибка чтения файла", "Выбран не тот файл или файл содержит ошибки",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        private MessageBoxResult ShowMessage(string title, string message, MessageBoxButton button,
+            MessageBoxImage icon)
+        {
+            return MessageBox.Show(message, title, button, icon, MessageBoxResult.Yes);
+        }
+
+        #region Events
 
         private void Button_Click_Add_Step(object sender, RoutedEventArgs e)
         {
@@ -85,16 +79,22 @@ namespace DialogueEditor
             var button = sender as Button;
             var step = button.Tag;
 
-           viewModel.AddVariant((StepExtension)step);
+            viewModel.AddVariant((StepExtension) step);
         }
 
         private void Button_Click_Delete_Variant(object sender, RoutedEventArgs e)
         {
             var button = sender as Button;
             var varuant = button.Tag;
-            
 
-            viewModel.DeleteVariant((VariantNotify)varuant);
+
+            viewModel.DeleteVariant((VariantNotify) varuant);
         }
+
+        private void Button_Click_Create_File(object sender, RoutedEventArgs e)
+        {
+        }
+
+        #endregion
     }
 }

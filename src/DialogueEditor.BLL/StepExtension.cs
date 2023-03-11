@@ -18,9 +18,8 @@ namespace DialogueEditor.BLL
             set
             {
                 if (tag != null)
-                {
                     _model.ChangeTag(value, tag);
-                }
+                
                 tag = value;
                 OnPropertyChanged(nameof(Tag));
             }

@@ -10,8 +10,10 @@ namespace DialogueEditor.BLL
 
         private string? selectedTag;
         private StepExtension selectedStep;
-        
+
         private string isShowStepDialog;
+
+        private string _path;
 
         public Dictionary<string, StepExtension>? TagSteps
         {
@@ -26,7 +28,8 @@ namespace DialogueEditor.BLL
 
         public StepExtension SelectedStep
         {
-            get => selectedStep; set
+            get => selectedStep;
+            set
             {
                 selectedStep = value;
                 OnPropertyChanged(nameof(selectedStep));
@@ -66,16 +69,9 @@ namespace DialogueEditor.BLL
 
         public void GetSteps(string path)
         {
-            var deserializer = new Deserializer(path);
-            var result = deserializer.GetAllSteps();
+            _path = path;
 
-            var boxTagSteps = new Dictionary<string, StepExtension>();
-
-            foreach (var step in result)
-            {
-                boxTagSteps.TryAdd(step.Key, new StepExtension(step.Value, step.Key, this));
-            }
-            TagSteps = boxTagSteps;
+            TagSteps = DeserializeSteps(_path);
 
             SelectedTag = null;
             IsShowStepDialog = "Hidden";
@@ -100,7 +96,7 @@ namespace DialogueEditor.BLL
             var step = new StepExtension(this)
             {
                 Tag = "dialog" + TagSteps.Count,
-                Variants = new List<VariantNotify> { new VariantNotify() }
+                Variants = new List<VariantNotify> {new VariantNotify()}
             };
 
             var result = CreateDictionary();
@@ -117,6 +113,7 @@ namespace DialogueEditor.BLL
             {
                 boxVariants.Add(variant);
             }
+
             boxVariants.Add(new VariantNotify());
 
             step.Variants = boxVariants;
@@ -128,19 +125,6 @@ namespace DialogueEditor.BLL
 
             var newStep = new StepExtension(SelectedStep, SelectedStep.Tag, this);
             SelectedStep = newStep;
-        }
-
-        public void Save()
-        {
-            if (TagSteps == null)
-                return;
-
-            XmlSerializer serializer = new XmlSerializer(typeof(List<StepExtension>));
-            
-            using (FileStream fileStream = new FileStream("output.xml", FileMode.Create))
-            {
-                serializer.Serialize(fileStream, TagSteps.Values.ToList());
-            }
         }
 
         private void ChangeTagInDictionary(string oldTag, string newTag)
@@ -161,12 +145,90 @@ namespace DialogueEditor.BLL
             return result;
         }
 
+        public void Save()
+        {
+            if (TagSteps == null)
+                return;
+
+            XmlSerializer serializer = new XmlSerializer(typeof(List<StepExtension>));
+
+            using (FileStream fileStream = new FileStream(_path, FileMode.Create))
+            {
+                serializer.Serialize(fileStream, TagSteps.Values.ToList());
+            }
+        }
+
+        public void CreateFile()
+        {
+            var newSteps = new List<StepExtension>()
+            {
+                new StepExtension()
+                {
+                    Question = "Слова детектива",
+                    Answer = "Слова npc",
+                    Tag = "dialog_1",
+                    Variants = new List<VariantNotify>()
+                    {
+                        new VariantNotify()
+                        {
+                            Question = "Слова детектива",
+                            Answer = "Слова npc"
+                        }
+                    }
+                }
+            };
+
+            var nameFile = "dialog.xml";
+            var path = AppDomain.CurrentDomain.BaseDirectory + nameFile;
+
+            var serializer = new XmlSerializer(typeof(List<StepExtension>));
+            
+            if(File.Exists(path))
+            {
+                path = path.Remove(path.Length - nameFile.Length, nameFile.Length);
+                
+                var rnd = new Random();
+                path = path + "dialog" + rnd.Next(100000, 2000000) + ".xml";
+            }
+
+            _path = path; 
+            
+            using (var fileStream = new FileStream(path, FileMode.Create))
+            {
+                serializer.Serialize(fileStream, newSteps);
+                fileStream.Close();
+            }
+
+            TagSteps = DeserializeSteps(path);
+
+            SelectedTag = null;
+            IsShowStepDialog = "Hidden";
+        }
+
+        private Dictionary<string, StepExtension> DeserializeSteps(string path)
+        {
+            var deserializer = new Deserializer(path);
+            var result = deserializer.GetAllSteps();
+
+            var tagSteps = new Dictionary<string, StepExtension>();
+
+            foreach (var step in result)
+            {
+                tagSteps.TryAdd(step.Key, new StepExtension(step.Value, step.Key, this));
+            }
+
+            return tagSteps;
+        }
+
         #region INotifyPropertyChanged
+
         public event PropertyChangedEventHandler PropertyChanged;
+
         private void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
         #endregion
     }
 }

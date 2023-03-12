@@ -32,7 +32,7 @@ namespace DialogueEditor
                 var button = MessageBoxButton.OKCancel;
                 var icon = MessageBoxImage.Warning;
 
-                var result = ShowMessage(message, title, button, icon);
+                var result = ShowMessage(title, message, button, icon);
                 if (result != MessageBoxResult.OK)
                     return;
             }
@@ -93,6 +93,20 @@ namespace DialogueEditor
 
         private void Button_Click_Create_File(object sender, RoutedEventArgs e)
         {
+            if (viewModel.TagSteps != null)
+            {
+                var message =
+                    "В данный момент вы уже работаете с файлом. Вы уверены что хотите открыть другой файл? Все изменения будут утеряны";
+                var title = "Открытие файла";
+                var button = MessageBoxButton.OKCancel;
+                var icon = MessageBoxImage.Warning;
+
+                var result = ShowMessage(title, message, button, icon);
+                if (result != MessageBoxResult.OK)
+                    return;
+            }
+            
+            viewModel.CreateFile();
         }
 
         #endregion

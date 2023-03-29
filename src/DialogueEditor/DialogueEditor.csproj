@@ -5,10 +5,11 @@
         <TargetFramework>net7.0-windows</TargetFramework>
         <Nullable>enable</Nullable>
         <UseWPF>true</UseWPF>
+        <ApplicationIcon>Resources\favicon.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="XmlDeserializer" Version="1.0.3" />
+      <PackageReference Include="XmlDeserializer" Version="1.0.4" />
     </ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\DialogueEditor.BLL\DialogueEditor.BLL.csproj" />

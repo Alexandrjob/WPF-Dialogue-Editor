@@ -8,7 +8,7 @@ namespace DialogueEditor.BLL
     {
         public string Question { get; set; }
         public string Answer { get; set; }
-        public string? LinkTeg { get; set; }
+        public string? LinkTag { get; set; }
 
         public VariantNotify()
         {
@@ -19,7 +19,7 @@ namespace DialogueEditor.BLL
         {
             Question = variant.Question;
             Answer = variant.Answer;
-            LinkTeg = variant.LinkTeg;
+            LinkTag = variant.LinkTag;
         }
     }
 }

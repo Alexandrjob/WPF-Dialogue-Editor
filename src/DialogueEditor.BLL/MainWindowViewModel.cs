@@ -209,7 +209,8 @@ namespace DialogueEditor.BLL
         {
             var deserializer = new Deserializer(path);
             var result = deserializer.GetAllSteps();
-
+            deserializer.Dispose();
+            
             var tagSteps = new Dictionary<string, StepExtension>();
 
             foreach (var step in result)
